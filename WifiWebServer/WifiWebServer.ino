@@ -1,98 +1,45 @@
-/*
- *  This sketch demonstrates how to set up a simple HTTP-like server.
- *  The server will set a GPIO pin depending on the request
- *    http://server_ip/gpio/0 will set the GPIO2 low,
- *    http://server_ip/gpio/1 will set the GPIO2 high
- *  server_ip is the IP address of the ESP8266 module, will be 
- *  printed to Serial when the module is connected.
- */
+#include <ESP8266WiFi.h>      // 提供Wi-Fi功能的程式庫
+#include <ESP8266WebServer.h>  // 提供網站伺服器功能的程式庫
 
-#include <ESP8266WiFi.h>
+const char ssid[] = "dlink 1F";
+const char pass[] = "JG474239";
 
-const char* ssid = "your-ssid";
-const char* password = "your-password";
+ESP8266WebServer server(80);   // 宣告網站伺服器物件與埠號
 
-// Create an instance of the server
-// specify the port to listen on as an argument
-WiFiServer server(80);
+// 定義處理首頁請求的自訂函式
+void rootRouter() {
+  server.send(200, "text/html", "Hello from <b>ESP8266</b>!");   //網頁的html 在此(紅色字體可做修改)
+}
 
 void setup() {
-  Serial.begin(115200);
-  delay(10);
+  Serial.begin(115200);  
+  WiFi.begin(ssid, pass);
+  /*
+   *  若要指定IP位址，請自行在此加入WiFi.config()敘述。
+   WiFi.config(IPAddress(192,168,1,50),    // IP位址
+               IPAddress(192,168,1,1),     // 閘道（gateway）位址
+               IPAddress(255,255,255,0));  // 網路遮罩（netmask）
+   */
 
-  // prepare GPIO2
-  pinMode(2, OUTPUT);
-  digitalWrite(2, 0);
-  
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(500);   // 等待WiFi連線
     Serial.print(".");
   }
   Serial.println("");
-  Serial.println("WiFi connected");
-  
-  // Start the server
-  server.begin();
-  Serial.println("Server started");
+  Serial.print("WiFi connected, IP: ");
+  Serial.println(WiFi.localIP());  // 顯示ESP8266裝置的IP位址
 
-  // Print the IP address
-  Serial.println(WiFi.localIP());
+  server.on("/index.html", rootRouter);  // 處理首頁連結請求的事件
+  server.on("/", rootRouter);
+  
+  server.onNotFound([](){   // 處理「找不到指定路徑」的事件
+    server.send(404, "text/plain", "File NOT found!");
+  });
+  
+  server.begin();
+  Serial.println("HTTP server started.");
 }
 
 void loop() {
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
-  
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){
-    delay(1);
-  }
-  
-  // Read the first line of the request
-  String req = client.readStringUntil('\r');
-  Serial.println(req);
-  client.flush();
-  
-  // Match the request
-  int val;
-  if (req.indexOf("/gpio/0") != -1)
-    val = 0;
-  else if (req.indexOf("/gpio/1") != -1)
-    val = 1;
-  else {
-    Serial.println("invalid request");
-    client.stop();
-    return;
-  }
-
-  // Set GPIO2 according to the request
-  digitalWrite(2, val);
-  
-  client.flush();
-
-  // Prepare the response
-  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
-  s += (val)?"high":"low";
-  s += "</html>\n";
-
-  // Send the response to the client
-  client.print(s);
-  delay(1);
-  Serial.println("Client disonnected");
-
-  // The client will actually be disconnected 
-  // when the function returns and 'client' object is detroyed
+    server.handleClient();  // 處理用戶連線
 }
