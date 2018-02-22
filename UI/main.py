@@ -7,6 +7,8 @@ Created on Sun Feb 18 02:42:55 2018
 """
 
 import sys
+import get_ID
+import main_structure
 from UI import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -27,6 +29,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.newSalary = QTableWidgetItem(salary)
         self.tableWidget.setItem(0, 0, self.newName)
         self.tableWidget.setItem(0, 1, self.newSalary)
+        fo = open("test2.txt\n","a")
+        test = "testtt"
+        fo.write(test)
+        fo.close()
+        print(get_ID.get_ID())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
