@@ -1,0 +1,17 @@
+import datetime
+from time import gmtime, strftime
+import time
+a = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+print(a)
+print(a[11:19])
+
+print(datetime.datetime.now())
+
+b = str(datetime.datetime.now())
+print(b[0:16])
+c = datetime.datetime.now()
+time.sleep(10)
+d = datetime.datetime.now()
+
+e = d - c
+print(e)
