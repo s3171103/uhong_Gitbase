@@ -13,6 +13,7 @@ from UI import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+import datetime
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -29,9 +30,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.newSalary = QTableWidgetItem(salary)
         self.tableWidget.setItem(0, 0, self.newName)
         self.tableWidget.setItem(0, 1, self.newSalary)
-        fo = open("test2.txt\n","a")
-        test = "testtt"
-        fo.write(test)
+        fo = open("test2.txt","a")
+        test = get_ID.get_ID()
+        time = str(datetime.datetime.now())
+        time = time[0:16]
+        fo.write(test + " " + time + '\n')
         fo.close()
         print(get_ID.get_ID())
 

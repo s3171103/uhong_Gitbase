@@ -11,7 +11,7 @@ import requests
 def get_ID():
 
     try:
-        res = requests.get('http://192.168.1.105')
+        res = requests.get('http://192.168.1.242')
         return res.text
     except:
         return "Connection Filed"
